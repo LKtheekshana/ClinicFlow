@@ -33,7 +33,7 @@ struct AppBottomTabBar: View {
 
     private let tabs: [TabDef] = [
         TabDef(icon: "house.fill",     title: "Home",     tab: .home),
-        TabDef(icon: "message.fill",   title: "Messages", tab: .messages),
+        TabDef(icon: "message.fill",   title: "Notifications", tab: .messages),
         TabDef(icon: "calendar",       title: "Bookings", tab: .bookings),
         TabDef(icon: "gearshape.fill", title: "Settings", tab: .settings),
     ]
@@ -46,9 +46,9 @@ struct AppBottomTabBar: View {
                 Button(action: { withAnimation(.none) { action(for: item.tab)() } }) {
                     VStack(spacing: 4) {
                         Image(systemName: item.icon)
-                            .font(.system(size: 20, weight: .semibold))
+                            .scalableFont(size: 20, weight: .semibold)
                         Text(item.title)
-                            .font(.system(size: 10, weight: .medium))
+                            .scalableFont(size: 10, weight: .medium)
                     }
                     .foregroundColor(
                         item.tab == activeTab
