@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HomeDashboardView: View {
     @EnvironmentObject private var tabRouter: TabRouter
+    @EnvironmentObject private var voiceGuidance: VoiceGuidanceManager
     @State private var navigateToPatientDetails = false
     @State private var navigateToConsultation = false
     @State private var navigateToPharmacy = false
@@ -14,6 +15,8 @@ struct HomeDashboardView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
+                ProfileNavBar()
+                
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 0) {
                         specialtySection
@@ -34,6 +37,9 @@ struct HomeDashboardView: View {
         }
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
+        .onAppear {
+            voiceGuidance.announceScreen(title: "Home Dashboard", instructions: "Browse doctor specialties, schedule appointments, and access our services. Swipe through the options to select.")
+        }
         .navigationDestination(isPresented: $navigateToPatientDetails) {
             PatientDetailsView(onDone: { navigateToPatientDetails = false })
         }
@@ -56,14 +62,14 @@ struct HomeDashboardView: View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
                 Text("The Doctor Specialties")
-                    .font(.system(size: 42 / 2, weight: .bold))
+                    .scalableFont(size: 42 / 2, weight: .bold)
                     .foregroundColor(Color(red: 0.12, green: 0.14, blue: 0.22))
 
                 Spacer()
 
                 Button("See all") {
                 }
-                .font(.system(size: 36 / 2, weight: .medium))
+                .scalableFont(size: 36 / 2, weight: .medium)
                 .foregroundColor(.brand)
             }
             .padding(.horizontal, 24)
@@ -92,15 +98,16 @@ struct HomeDashboardView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Schedule an\nappointment with your\npreferred specialist")
-                        .font(.system(size: 14, weight: .medium))
+                        .scalableFont(size: 14, weight: .medium)
                         .foregroundColor(.white)
                         .lineSpacing(4)
 
                     Button {
                         navigateToPatientDetails = true
+                        voiceGuidance.announceButton("Book Appointments", purpose: "Schedule a consultation with a specialist doctor")
                     } label: {
                         Text("Book\nAppointments")
-                            .font(.system(size: 14, weight: .bold))
+                            .scalableFont(size: 14, weight: .bold)
                             .foregroundColor(.brand)
                             .multilineTextAlignment(.center)
                             .frame(maxWidth: .infinity)
@@ -131,14 +138,14 @@ struct HomeDashboardView: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Text("Our Services")
-                    .font(.system(size: 44 / 2, weight: .medium))
+                    .scalableFont(size: 44 / 2, weight: .medium)
                     .foregroundColor(Color(red: 0.12, green: 0.14, blue: 0.22))
 
                 Spacer()
 
                 Button("See all") {
                 }
-                .font(.system(size: 36 / 2, weight: .medium))
+                .scalableFont(size: 36 / 2, weight: .medium)
                 .foregroundColor(.brand)
             }
             .padding(.horizontal, 24)
@@ -146,15 +153,19 @@ struct HomeDashboardView: View {
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
                 ServiceItem(icon: "stethoscope", title: "Consultation", subtitle: "See a specialist") {
                     navigateToConsultation = true
+                    voiceGuidance.announceButton("Consultation", purpose: "Schedule consultation with a specialist doctor")
                 }
                 ServiceItem(icon: "location.north.circle", title: "Directions", subtitle: "Book your doctor") {
                     navigateToDirections = true
+                    voiceGuidance.announceButton("Directions", purpose: "Get directions to the clinic")
                 }
                 ServiceItem(icon: "flask", title: "Laboratory", subtitle: "View test reports") {
                     navigateToLab = true
+                    voiceGuidance.announceButton("Laboratory", purpose: "View and order laboratory tests")
                 }
                 ServiceItem(icon: "pills.fill", title: "Pharmacy", subtitle: "Order medicines") {
                     navigateToPharmacy = true
+                    voiceGuidance.announceButton("Pharmacy", purpose: "Order medicines from our pharmacy")
                 }
             }
             .padding(.horizontal, 24)
@@ -174,12 +185,12 @@ private struct SpecialtyItem: View {
                 .frame(width: 56, height: 56)
                 .overlay(
                     Image(systemName: icon)
-                        .font(.system(size: 20, weight: .semibold))
+                        .scalableFont(size: 20, weight: .semibold)
                         .foregroundColor(.brand)
                 )
 
             Text(title)
-                .font(.system(size: 13, weight: .regular))
+                .scalableFont(size: 13, weight: .regular)
                 .foregroundColor(Color(red: 0.20, green: 0.23, blue: 0.30))
         }
         .frame(maxWidth: .infinity)
@@ -202,23 +213,23 @@ private struct ServiceItem: View {
                     .frame(width: 52, height: 52)
                     .overlay(
                         Image(systemName: icon)
-                            .font(.system(size: 22, weight: .medium))
+                            .scalableFont(size: 22, weight: .medium)
                             .foregroundColor(.brand)
                     )
 
                 Text(title)
-                    .font(.system(size: 16, weight: .medium))
+                    .scalableFont(size: 16, weight: .medium)
                     .foregroundColor(Color(red: 0.12, green: 0.14, blue: 0.22))
 
                 HStack {
                     Text(subtitle)
-                        .font(.system(size: 13, weight: .regular))
+                        .scalableFont(size: 13, weight: .regular)
                         .foregroundColor(Color(red: 0.60, green: 0.62, blue: 0.71))
 
                     Spacer()
 
                     Image(systemName: "arrow.right")
-                        .font(.system(size: 24 / 2, weight: .bold))
+                        .scalableFont(size: 24 / 2, weight: .bold)
                         .foregroundColor(.brand)
                 }
             }

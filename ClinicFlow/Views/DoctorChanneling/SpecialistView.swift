@@ -6,14 +6,15 @@ struct SpecialistView: View {
     @State private var selectedCategory     = "Dermatologist"
     @State private var navigateToDoctorChanneling = false
     @State private var navigateToDoctorProfile    = false
+    @State private var selectedSpecialist: Specialist? = nil
 
     private let categories = ["Dermatologist", "Heart Surgeon", "Neurologist"]
 
     private let specialists: [Specialist] = [
-        Specialist(name: "Dr. Sarah Johnson",   subtitle: "MBBS, Dermatologist specialist",    rating: 5, reviews: 124, imageSymbol: "person.crop.circle.fill.badge.checkmark", experience: "8 yrs", available: true),
-        Specialist(name: "Dr. Michael Chen",    subtitle: "MBBS, MD, Dermatologist specialist", rating: 4, reviews: 89,  imageSymbol: "person.crop.circle.fill.badge.plus",       experience: "12 yrs", available: true),
-        Specialist(name: "Dr. Emily Rodriguez", subtitle: "MBBS, Dermatologist specialist",    rating: 5, reviews: 156, imageSymbol: "person.crop.circle.fill",                  experience: "6 yrs",  available: false),
-        Specialist(name: "Dr. David Thompson",  subtitle: "MBBS, MD, Dermatologist specialist", rating: 4, reviews: 73,  imageSymbol: "person.crop.circle.fill.badge.checkmark", experience: "10 yrs", available: true),
+        Specialist(name: "Dr. Sarah Johnson",   subtitle: "MBBS, Dermatologist specialist",    rating: 5, reviews: 124, imageAsset: "sarah", imageSymbol: "person.crop.circle.fill.badge.checkmark", experience: "8 yrs", available: true),
+        Specialist(name: "Dr. Michael Chen",    subtitle: "MBBS, MD, Dermatologist specialist", rating: 4, reviews: 89,  imageAsset: "namal", imageSymbol: "person.crop.circle.fill.badge.plus",       experience: "12 yrs", available: true),
+        Specialist(name: "Dr. Emily Rodriguez", subtitle: "MBBS, Dermatologist specialist",    rating: 5, reviews: 156, imageAsset: "emily", imageSymbol: "person.crop.circle.fill",                  experience: "6 yrs",  available: false),
+        Specialist(name: "Dr. David Thompson",  subtitle: "MBBS, MD, Dermatologist specialist", rating: 4, reviews: 73,  imageAsset: "david", imageSymbol: "person.crop.circle.fill.badge.checkmark", experience: "10 yrs", available: true),
     ]
 
     // MARK: - Body
@@ -34,6 +35,7 @@ struct SpecialistView: View {
                     LazyVStack(spacing: 14) {
                         ForEach(specialists) { s in
                             SpecialistCard(specialist: s) {
+                                selectedSpecialist = s
                                 navigateToDoctorProfile = true
                             }
                         }
@@ -51,7 +53,9 @@ struct SpecialistView: View {
             DoctorChannelingView(onDone: onDone)
         }
         .navigationDestination(isPresented: $navigateToDoctorProfile) {
-            DoctorProfileView(onDone: onDone)
+            if let specialist = selectedSpecialist {
+                DoctorProfileView(specialist: specialist, onDone: onDone)
+            }
         }
     }
 
@@ -60,7 +64,7 @@ struct SpecialistView: View {
     private var categorySection: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text("Specialty")
-                .font(.system(size: 11, weight: .semibold))
+                .scalableFont(size: 11, weight: .semibold)
                 .foregroundColor(Color(.secondaryLabel))
                 .kerning(0.4)
                 .padding(.horizontal, 20)
@@ -73,9 +77,9 @@ struct SpecialistView: View {
                         Button { withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { selectedCategory = cat } } label: {
                             HStack(spacing: 6) {
                                 Image(systemName: iconFor(cat))
-                                    .font(.system(size: 12, weight: .semibold))
+                                    .scalableFont(size: 12, weight: .semibold)
                                 Text(cat)
-                                    .font(.system(size: 14, weight: .medium))
+                                    .scalableFont(size: 14, weight: .medium)
                             }
                             .foregroundColor(selectedCategory == cat ? .white : Color(.label))
                             .padding(.horizontal, 16)
@@ -105,14 +109,14 @@ struct SpecialistView: View {
     private var resultsMeta: some View {
         HStack {
             Text("\(specialists.count) specialists found")
-                .font(.system(size: 13, weight: .medium))
+                .scalableFont(size: 13, weight: .medium)
                 .foregroundColor(Color(.secondaryLabel))
             Spacer()
             HStack(spacing: 4) {
                 Image(systemName: "line.3.horizontal.decrease")
-                    .font(.system(size: 13, weight: .medium))
+                    .scalableFont(size: 13, weight: .medium)
                 Text("Filter")
-                    .font(.system(size: 13, weight: .medium))
+                    .scalableFont(size: 13, weight: .medium)
             }
             .foregroundColor(Color.brand)
         }
@@ -134,6 +138,8 @@ struct SpecialistView: View {
 private struct SpecialistCard: View {
     let specialist: Specialist
     let onTap: () -> Void
+    
+    @State private var showUnavailableAlert = false
 
     // Gradient colors cycle through brand-adjacent hues for each doctor
     private let gradients: [[Color]] = [
@@ -151,55 +157,54 @@ private struct SpecialistCard: View {
     }
 
     var body: some View {
-        Button(action: onTap) {
-            VStack(spacing: 0) {
-                // Top: avatar + info
-                HStack(alignment: .top, spacing: 14) {
-                    // Avatar
-                    Image("doctor_placeholder")
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 62, height: 62)
-                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                        .shadow(color: Color.brand.opacity(0.25), radius: 8, x: 0, y: 4)
+        VStack(spacing: 0) {
+            // Top: avatar + info
+            HStack(alignment: .top, spacing: 14) {
+                // Avatar
+                Image(specialist.imageAsset)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 62, height: 62)
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .shadow(color: Color.brand.opacity(0.25), radius: 8, x: 0, y: 4)
 
-                    // Text info
-                    VStack(alignment: .leading, spacing: 5) {
-                        HStack(alignment: .top) {
-                            Text(specialist.name)
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(Color(.label))
-                            Spacer()
-                            availabilityBadge
+                // Text info
+                VStack(alignment: .leading, spacing: 5) {
+                    HStack(alignment: .top) {
+                        Text(specialist.name)
+                            .scalableFont(size: 16, weight: .semibold)
+                            .foregroundColor(Color(.label))
+                        Spacer()
+                        availabilityBadge
+                    }
+
+                    Text(specialist.subtitle)
+                        .scalableFont(size: 13)
+                        .foregroundColor(Color(.secondaryLabel))
+                        .lineSpacing(2)
+
+                    HStack(spacing: 10) {
+                        // Stars
+                        HStack(spacing: 3) {
+                            ForEach(0..<5, id: \.self) { i in
+                                Image(systemName: i < specialist.rating ? "star.fill" : "star")
+                                    .scalableFont(size: 11, weight: .semibold)
+                                    .foregroundColor(Color(red: 0.98, green: 0.76, blue: 0.12))
+                            }
+                            Text("(\(specialist.reviews))")
+                                .scalableFont(size: 12)
+                                .foregroundColor(Color(.tertiaryLabel))
+                                .padding(.leading, 2)
                         }
 
-                        Text(specialist.subtitle)
-                            .font(.system(size: 13))
-                            .foregroundColor(Color(.secondaryLabel))
-                            .lineSpacing(2)
+                        Spacer()
 
-                        HStack(spacing: 10) {
-                            // Stars
-                            HStack(spacing: 3) {
-                                ForEach(0..<5, id: \.self) { i in
-                                    Image(systemName: i < specialist.rating ? "star.fill" : "star")
-                                        .font(.system(size: 11, weight: .semibold))
-                                        .foregroundColor(Color(red: 0.98, green: 0.76, blue: 0.12))
-                                }
-                                Text("(\(specialist.reviews))")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(Color(.tertiaryLabel))
-                                    .padding(.leading, 2)
-                            }
-
-                            Spacer()
-
-                            // Experience badge
-                            HStack(spacing: 3) {
-                                Image(systemName: "clock")
-                                    .font(.system(size: 10, weight: .semibold))
+                        // Experience badge
+                        HStack(spacing: 3) {
+                            Image(systemName: "clock")
+                                .scalableFont(size: 10, weight: .semibold)
                                 Text(specialist.experience)
-                                    .font(.system(size: 11, weight: .medium))
+                                    .scalableFont(size: 11, weight: .medium)
                             }
                             .foregroundColor(Color(.secondaryLabel))
                             .padding(.horizontal, 8)
@@ -216,14 +221,20 @@ private struct SpecialistCard: View {
 
                 // Bottom: action strip
                 HStack(spacing: 0) {
-                    Button(action: onTap) {
+                    Button(action: {
+                        if specialist.available {
+                            onTap()
+                        } else {
+                            showUnavailableAlert = true
+                        }
+                    }) {
                         HStack(spacing: 6) {
                             Image(systemName: "person.crop.circle.badge.plus")
-                                .font(.system(size: 13, weight: .medium))
+                                .scalableFont(size: 13, weight: .medium)
                             Text("View Profile")
-                                .font(.system(size: 13, weight: .medium))
+                                .scalableFont(size: 13, weight: .medium)
                         }
-                        .foregroundColor(Color.brand)
+                        .foregroundColor(specialist.available ? Color.brand : Color(.systemGray3))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 11)
                     }
@@ -231,12 +242,18 @@ private struct SpecialistCard: View {
 
                     Divider().frame(height: 28)
 
-                    Button(action: onTap) {
+                    Button(action: {
+                        if specialist.available {
+                            onTap()
+                        } else {
+                            showUnavailableAlert = true
+                        }
+                    }) {
                         HStack(spacing: 6) {
                             Image(systemName: "calendar.badge.plus")
-                                .font(.system(size: 13, weight: .medium))
+                                .scalableFont(size: 13, weight: .medium)
                             Text("Book Now")
-                                .font(.system(size: 13, weight: .semibold))
+                                .scalableFont(size: 13, weight: .semibold)
                         }
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
@@ -244,19 +261,21 @@ private struct SpecialistCard: View {
                         .background(specialist.available ? Color.brand : Color(.systemGray3))
                     }
                     .buttonStyle(.plain)
-                    .disabled(!specialist.available)
                 }
                 .clipShape(
                     UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 14,
                                            bottomTrailingRadius: 14, topTrailingRadius: 0,
                                            style: .continuous)
                 )
-            }
         }
-        .buttonStyle(.plain)
         .background(Color(.systemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 3)
+        .alert("Doctor Unavailable", isPresented: $showUnavailableAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("\(specialist.name) is currently unavailable. Please select another doctor or try again later.")
+        }
     }
 
     private var availabilityBadge: some View {
@@ -265,7 +284,7 @@ private struct SpecialistCard: View {
                 .fill(specialist.available ? Color(red: 0.18, green: 0.72, blue: 0.46) : Color(.systemGray3))
                 .frame(width: 6, height: 6)
             Text(specialist.available ? "Available" : "Unavailable")
-                .font(.system(size: 11, weight: .semibold))
+                .scalableFont(size: 11, weight: .semibold)
                 .foregroundColor(specialist.available ? Color(red: 0.10, green: 0.58, blue: 0.36) : Color(.secondaryLabel))
         }
         .padding(.horizontal, 8)
@@ -277,12 +296,13 @@ private struct SpecialistCard: View {
 
 // MARK: - Model
 
-private struct Specialist: Identifiable {
+struct Specialist: Identifiable {
     let id = UUID()
     let name: String
     let subtitle: String
     let rating: Int
     let reviews: Int
+    let imageAsset: String
     let imageSymbol: String
     let experience: String
     let available: Bool

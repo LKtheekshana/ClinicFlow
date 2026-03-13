@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DoctorProfileView: View {
     @Environment(\.dismiss) private var dismiss
+    let specialist: Specialist
     var onDone: (() -> Void)? = nil
     @State private var navigateToPayment = false
 
@@ -48,7 +49,7 @@ struct DoctorProfileView: View {
                         .frame(width: 182, height: 182)
                         .shadow(color: Color.black.opacity(0.12), radius: 12, x: 0, y: 6)
                         .overlay(
-                            Image("doctor_placeholder")
+                            Image(specialist.imageAsset)
                                 .resizable()
                                 .scaledToFill()
                                 .frame(width: 178, height: 178)
@@ -81,14 +82,14 @@ struct DoctorProfileView: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Dr. Mohan Silva")
-                        .font(.system(size: 22, weight: .semibold))
+                    Text(specialist.name)
+                        .scalableFont(size: 22, weight: .semibold)
                         .foregroundStyle(Color(red: 0.12, green: 0.14, blue: 0.21))
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
 
-                    Text("MBBS, Dermatologist")
-                        .font(.system(size: 14, weight: .regular))
+                    Text(specialist.subtitle)
+                        .scalableFont(size: 14, weight: .regular)
                         .foregroundStyle(Color(red: 0.57, green: 0.59, blue: 0.65))
                 }
 
@@ -96,11 +97,11 @@ struct DoctorProfileView: View {
 
                 HStack(spacing: 6) {
                     Image(systemName: "star.fill")
-                        .font(.system(size: 13, weight: .semibold))
+                        .scalableFont(size: 13, weight: .semibold)
                         .foregroundStyle(Color(red: 0.98, green: 0.77, blue: 0.10))
 
-                    Text("4.7")
-                        .font(.system(size: 15, weight: .medium))
+                    Text("\(Double(specialist.rating)).0")
+                        .scalableFont(size: 15, weight: .medium)
                         .foregroundStyle(Color(red: 0.24, green: 0.27, blue: 0.34))
                 }
                 .padding(.horizontal, 12)
@@ -125,19 +126,19 @@ struct DoctorProfileView: View {
             .padding(.top, 24)
 
             Text("About Doctor")
-                .font(.system(size: 17, weight: .semibold))
+                .scalableFont(size: 17, weight: .semibold)
                 .foregroundStyle(Color(red: 0.12, green: 0.14, blue: 0.21))
                 .padding(.top, 20)
 
-            Text("Dr. Mohan Silva is a highly experienced dermatologist with over 8 years of practice. He specializes in treating various skin conditions and cosmetic procedures. Dr. Silva is known for his patient-centered approach...")
-                .font(.system(size: 14, weight: .regular))
+            Text("\(specialist.name) is a highly experienced specialist with \(specialist.experience) of practice. They specialize in providing excellent healthcare and are known for their patient-centered approach...")
+                .scalableFont(size: 14, weight: .regular)
                 .foregroundStyle(Color(red: 0.57, green: 0.59, blue: 0.65))
                 .lineSpacing(5)
                 .padding(.top, 10)
 
             Button("Read More") {
             }
-            .font(.system(size: 14, weight: .medium))
+            .scalableFont(size: 14, weight: .medium)
             .foregroundStyle(.brand)
             .padding(.top, 10)
 
@@ -149,7 +150,7 @@ struct DoctorProfileView: View {
                         .frame(width: 52, height: 52)
                         .overlay(
                             Image(systemName: "heart")
-                                .font(.system(size: 18, weight: .medium))
+                                .scalableFont(size: 18, weight: .medium)
                                 .foregroundStyle(.brand)
                         )
                 }
@@ -158,7 +159,7 @@ struct DoctorProfileView: View {
                     navigateToPayment = true
                 } label: {
                     Text("BOOK NOW")
-                        .font(.system(size: 17, weight: .semibold))
+                        .scalableFont(size: 17, weight: .semibold)
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 54)
@@ -186,11 +187,11 @@ struct DoctorProfileView: View {
     private func statCard(title: String, value: String, colors: [Color]) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title)
-                .font(.system(size: 13, weight: .regular))
+                .scalableFont(size: 13, weight: .regular)
                 .foregroundStyle(.white.opacity(0.9))
 
             Text(value)
-                .font(.system(size: 18, weight: .semibold))
+                .scalableFont(size: 18, weight: .semibold)
                 .foregroundStyle(.white)
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
@@ -206,5 +207,6 @@ struct DoctorProfileView: View {
 }
 
 #Preview {
-    DoctorProfileView()
+    let specialist = Specialist(name: "Dr. Sarah Johnson", subtitle: "MBBS, Dermatologist specialist", rating: 5, reviews: 124, imageAsset: "sarah", imageSymbol: "person.crop.circle.fill.badge.checkmark", experience: "8 yrs", available: true)
+    DoctorProfileView(specialist: specialist)
 }

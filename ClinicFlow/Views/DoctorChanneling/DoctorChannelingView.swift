@@ -59,7 +59,7 @@ struct DoctorChannelingView: View {
                         label: "Doctor Name"
                     ) {
                         TextField("Enter doctor name", text: $doctorName)
-                            .font(.system(size: 16))
+                            .scalableFont(size: 16)
                             .focused($nameFieldFocused)
                             .submitLabel(.done)
                             .onSubmit { nameFieldFocused = false }
@@ -98,7 +98,7 @@ struct DoctorChannelingView: View {
                             value: formattedDate,
                             isOpen: showDatePicker
                         ) {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.82)) {
+                            withAnimation(.easeInOut(duration: 0.25)) {
                                 showDatePicker.toggle()
                                 showSpecPicker = false
                                 nameFieldFocused = false
@@ -108,6 +108,7 @@ struct DoctorChannelingView: View {
                     if showDatePicker {
                         rowDivider
                         datePicker
+                            .transition(.opacity.combined(with: .move(edge: .top)))
                     }
                 }
 
@@ -122,9 +123,9 @@ struct DoctorChannelingView: View {
                 } label: {
                     HStack(spacing: 10) {
                         Image(systemName: "magnifyingglass")
-                            .font(.system(size: 16, weight: .semibold))
+                            .scalableFont(size: 16, weight: .semibold)
                         Text("Search Doctors")
-                            .font(.system(size: 16, weight: .semibold))
+                            .scalableFont(size: 16, weight: .semibold)
                     }
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
@@ -146,7 +147,17 @@ struct DoctorChannelingView: View {
         .onTapGesture { nameFieldFocused = false }
         .clinicNavBar(title: "Doctor Channeling", onBack: { dismiss() })
         .navigationDestination(isPresented: $navigateToDoctorProfile) {
-            DoctorProfileView(onDone: onDone)
+            let specialist = Specialist(
+                name: doctorName.isEmpty ? "Dr. Unknown" : "Dr. \(doctorName)",
+                subtitle: "MBBS, \(specialization)",
+                rating: 4,
+                reviews: 85,
+                imageAsset: "doctor_placeholder",
+                imageSymbol: "person.crop.circle.fill",
+                experience: "8 yrs",
+                available: true
+            )
+            DoctorProfileView(specialist: specialist, onDone: onDone)
         }
     }
 
@@ -155,17 +166,17 @@ struct DoctorChannelingView: View {
     private var heroBanner: some View {
         HStack(spacing: 14) {
             Image(systemName: "stethoscope.circle.fill")
-                .font(.system(size: 38))
+                .scalableFont(size: 38)
                 .foregroundColor(Color.brand)
                 .frame(width: 56, height: 56)
                 .background(Color.brand.opacity(0.10))
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             VStack(alignment: .leading, spacing: 4) {
                 Text("Find the Right Doctor")
-                    .font(.system(size: 16, weight: .semibold))
+                    .scalableFont(size: 16, weight: .semibold)
                     .foregroundColor(.primary)
                 Text("Search by name, specialty, or date for your next appointment.")
-                    .font(.system(size: 12))
+                    .scalableFont(size: 12)
                     .foregroundColor(Color(.secondaryLabel))
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -194,9 +205,9 @@ struct DoctorChannelingView: View {
                     } label: {
                         HStack(spacing: 5) {
                             Image(systemName: specIcons[s] ?? "cross.case.fill")
-                                .font(.system(size: 11, weight: .semibold))
+                                .scalableFont(size: 11, weight: .semibold)
                             Text(s)
-                                .font(.system(size: 13, weight: .medium))
+                                .scalableFont(size: 13, weight: .medium)
                         }
                         .foregroundColor(specialization == s ? .white : Color(.label))
                         .padding(.horizontal, 12)
@@ -234,18 +245,18 @@ struct DoctorChannelingView: View {
                 } label: {
                     HStack(spacing: 12) {
                         Image(systemName: specIcons[s] ?? "cross.case.fill")
-                            .font(.system(size: 13))
+                            .scalableFont(size: 13)
                             .foregroundColor(col)
                             .frame(width: 28, height: 28)
                             .background(col.opacity(0.12))
                             .clipShape(Circle())
                         Text(s)
-                            .font(.system(size: 15))
+                            .scalableFont(size: 15)
                             .foregroundColor(.primary)
                         Spacer()
                         if specialization == s {
                             Image(systemName: "checkmark.circle.fill")
-                                .font(.system(size: 17))
+                                .scalableFont(size: 17)
                                 .foregroundColor(Color.brand)
                         }
                     }
@@ -263,26 +274,59 @@ struct DoctorChannelingView: View {
     // MARK: - Date Picker
 
     private var datePicker: some View {
-        DatePicker(
-            "",
-            selection: $selectedDate,
-            in: Date()...,
-            displayedComponents: .date
-        )
-        .datePickerStyle(.graphical)
-        .tint(Color.brand)
+        VStack(alignment: .leading, spacing: 12) {
+            DatePicker(
+                "",
+                selection: $selectedDate,
+                in: Date()...,
+                displayedComponents: .date
+            )
+            .datePickerStyle(.graphical)
+            .tint(Color.brand)
+            .labelsHidden()
+            
+            // Quick selection buttons
+            HStack(spacing: 10) {
+                quickDateButton("Today", offset: 0)
+                quickDateButton("Tomorrow", offset: 1)
+                quickDateButton("In 7 days", offset: 7)
+            }
+            .padding(.horizontal, 8)
+        }
         .padding(.horizontal, 8)
-        .padding(.bottom, 8)
+        .padding(.vertical, 12)
         .onChange(of: selectedDate) { _ in
             dateText = formattedDate
         }
+    }
+    
+    private func quickDateButton(_ title: String, offset: Int) -> some View {
+        let targetDate = Calendar.current.date(byAdding: .day, value: offset, to: Date()) ?? Date()
+        let isSelected = Calendar.current.isDate(selectedDate, inSameDayAs: targetDate)
+        
+        return Button {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                selectedDate = targetDate
+            }
+        } label: {
+            Text(title)
+                .scalableFont(size: 12, weight: .medium)
+                .foregroundColor(isSelected ? .white : Color.brand)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(isSelected ? Color.brand : Color.brand.opacity(0.12))
+                )
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Reusable Helpers
 
     private func sectionLabel(_ text: String) -> some View {
         Text(text.uppercased())
-            .font(.system(size: 11, weight: .semibold))
+            .scalableFont(size: 11, weight: .semibold)
             .foregroundColor(Color(.secondaryLabel))
             .kerning(0.4)
             .padding(.leading, 4)
@@ -306,7 +350,7 @@ struct DoctorChannelingView: View {
     ) -> some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
-                .font(.system(size: 15, weight: .medium))
+                .scalableFont(size: 15, weight: .medium)
                 .foregroundColor(iconColor)
                 .frame(width: 34, height: 34)
                 .background(iconColor.opacity(0.11))
@@ -314,7 +358,7 @@ struct DoctorChannelingView: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(label)
-                    .font(.system(size: 11, weight: .semibold))
+                    .scalableFont(size: 11, weight: .semibold)
                     .foregroundColor(Color(.secondaryLabel))
                     .textCase(.uppercase)
                     .kerning(0.2)
@@ -330,11 +374,11 @@ struct DoctorChannelingView: View {
         Button(action: action) {
             HStack {
                 Text(value)
-                    .font(.system(size: 16))
+                    .scalableFont(size: 16)
                     .foregroundColor(.primary)
                 Spacer()
                 Image(systemName: isOpen ? "chevron.up" : "chevron.down")
-                    .font(.system(size: 12, weight: .semibold))
+                    .scalableFont(size: 12, weight: .semibold)
                     .foregroundColor(isOpen ? Color.brand : Color(.tertiaryLabel))
                     .animation(.easeInOut(duration: 0.18), value: isOpen)
             }
