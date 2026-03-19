@@ -11,9 +11,9 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		D3EB59C12F52A4D4006660BA /* ClinicFlow */ = {
+		D3EB59C12F52A4D4006660BA /* ClinicApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = ClinicFlow;
+			path = ClinicApp;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -32,7 +32,7 @@
 		483B77B92F4ED83900D2EAB9 = {
 			isa = PBXGroup;
 			children = (
-				D3EB59C12F52A4D4006660BA /* ClinicFlow */,
+				D3EB59C12F52A4D4006660BA /* ClinicApp */,
 				483B77C32F4ED83A00D2EAB9 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -61,7 +61,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				D3EB59C12F52A4D4006660BA /* ClinicFlow */,
+				D3EB59C12F52A4D4006660BA /* ClinicApp */,
 			);
 			name = ClinicApp;
 			packageProductDependencies = (
